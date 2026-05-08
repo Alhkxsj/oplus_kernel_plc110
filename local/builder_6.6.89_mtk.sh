@@ -308,7 +308,6 @@ fi
 # ===== 启用网络功能增强优化配置 =====
 if [[ "$APPLY_BETTERNET" == "y" || "$APPLY_BETTERNET" == "Y" ]]; then
   echo ">>> 正在启用网络功能增强优化配置..."
-  echo "CONFIG_BPF_STREAM_PARSER=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_NETFILTER_XT_SET=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_IP_SET=y" >> "$DEFCONFIG_FILE"
