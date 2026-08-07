@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # ===== 设置自定义参数 =====
-echo "===== 欧加真MT6991通用6.6.50 A15 OKI内核本地编译脚本 By Coolapk@cctv18 ====="
+echo "===== 欧加真SM8750通用6.6.118 A15 OKI内核本地编译脚本 By Coolapk@cctv18 ====="
 echo ">>> 读取用户配置..."
 MANIFEST=${MANIFEST:-oppo+oplus+realme}
 read -p "请输入自定义内核后缀（默认：android15-8-g29d86c5fc9dd-abogki428889875-4k）: " CUSTOM_SUFFIX
@@ -21,8 +21,8 @@ read -p "是否应用 lz4 1.10.0 & zstd 1.5.7 补丁？(y/n，默认：y): " APP
 APPLY_LZ4=${APPLY_LZ4:-y}
 read -p "是否应用 lz4kd 补丁？(y/n，默认：n): " APPLY_LZ4KD
 APPLY_LZ4KD=${APPLY_LZ4KD:-n}
-read -p "是否启用网络功能增强优化配置？(y/n，默认：n): " APPLY_BETTERNET
-APPLY_BETTERNET=${APPLY_BETTERNET:-n}
+read -p "是否启用网络功能增强优化配置？(y/n，默认：y): " APPLY_BETTERNET
+APPLY_BETTERNET=${APPLY_BETTERNET:-y}
 read -p "是否添加 BBR 等一系列拥塞控制算法？(y添加/n禁用/d默认，默认：n): " APPLY_BBR
 APPLY_BBR=${APPLY_BBR:-n}
 read -p "是否添加 Droidspaces 容器支持？(n禁用/s标准/e扩展，默认：n): " APPLY_DROIDSPACES
@@ -91,7 +91,7 @@ echo ">>> 初始化仓库..."
 rm -rf kernel_workspace
 mkdir kernel_workspace
 cd kernel_workspace
-git clone --depth=1 https://github.com/cctv18/android_kernel_oneplus_mt6991 -b oneplus/mt6991_v_15.0.2_ace5_ultra common
+git clone --depth=1 https://github.com/cctv18/android_kernel_common_oneplus_sm8750 -b oneplus/sm8750_v_16.0.0_oneplus_13_6.6.118 common
 echo ">>> 初始化仓库完成"
 
 # ===== 清除 abi 文件、去除 -dirty 后缀 =====
@@ -169,12 +169,10 @@ if [[ "$APPLY_LZ4" == "y" || "$APPLY_LZ4" == "Y" ]]; then
   echo ">>> 正在添加lz4 1.10.0 & zstd 1.5.7补丁..."
   git clone --depth=1 https://github.com/cctv18/oppo_oplus_realme_sm8750.git
   cp ./oppo_oplus_realme_sm8750/zram_patch/001-lz4.patch ./common/
-  cp ./oppo_oplus_realme_sm8750/zram_patch/001-lz4-clearMake.patch ./common/
   cp ./oppo_oplus_realme_sm8750/zram_patch/lz4armv8.S ./common/lib
   cp ./oppo_oplus_realme_sm8750/zram_patch/002-zstd.patch ./common/
   cd "$WORKDIR/kernel_workspace/common"
   git apply -p1 < 001-lz4.patch || true
-  git apply -p1 < 001-lz4-clearMake.patch || true
   patch -p1 < 002-zstd.patch || true
   cd "$WORKDIR/kernel_workspace"
 else
@@ -255,6 +253,7 @@ fi
 # ===== 启用网络功能增强优化配置 =====
 if [[ "$APPLY_BETTERNET" == "y" || "$APPLY_BETTERNET" == "Y" ]]; then
   echo ">>> 正在启用网络功能增强优化配置..."
+  echo "CONFIG_BPF_STREAM_PARSER=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_NETFILTER_XT_SET=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_IP_SET=y" >> "$DEFCONFIG_FILE"
