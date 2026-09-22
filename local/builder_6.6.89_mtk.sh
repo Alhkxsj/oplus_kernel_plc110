@@ -167,11 +167,11 @@ cd "$WORKDIR/kernel_workspace"
 # ===== 应用 LZ4 & ZSTD 补丁 =====
 if [[ "$APPLY_LZ4" == "y" || "$APPLY_LZ4" == "Y" ]]; then
   echo ">>> 正在添加lz4 1.10.0 & zstd 1.5.7补丁..."
-  git clone --depth=1 https://github.com/cctv18/oppo_oplus_realme_sm8750.git
-  cp ./oppo_oplus_realme_sm8750/zram_patch/001-lz4.patch ./common/
-  cp ./oppo_oplus_realme_sm8750/zram_patch/001-lz4-clearMake.patch ./common/
-  cp ./oppo_oplus_realme_sm8750/zram_patch/lz4armv8.S ./common/lib
-  cp ./oppo_oplus_realme_sm8750/zram_patch/002-zstd.patch ./common/
+  git clone --depth=1 https://github.com/Alhkxsj/oplus_kernel_plc110.git
+  cp ./oplus_kernel_plc110/zram_patch/001-lz4.patch ./common/
+  cp ./oplus_kernel_plc110/zram_patch/001-lz4-clearMake.patch ./common/
+  cp ./oplus_kernel_plc110/zram_patch/lz4armv8.S ./common/lib
+  cp ./oplus_kernel_plc110/zram_patch/002-zstd.patch ./common/
   cd "$WORKDIR/kernel_workspace/common"
   git apply -p1 < 001-lz4.patch || true
   git apply -p1 < 001-lz4-clearMake.patch || true
@@ -236,7 +236,7 @@ echo "CONFIG_HEADERS_INSTALL=n" >> "$DEFCONFIG_FILE"
 
 # 应用 CVE_2026_43499 修复补丁
 cd common
-wget https://github.com/cctv18/oppo_oplus_realme_sm8750/raw/refs/heads/main/other_patch/cve-2026-43499-rtmutex-6.6.patch
+wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/other_patch/cve-2026-43499-rtmutex-6.6.patch
 patch -p1 -F 3 < cve-2026-43499-rtmutex-6.6.patch
 cd ..
 
@@ -279,7 +279,7 @@ if [[ "$APPLY_BETTERNET" == "y" || "$APPLY_BETTERNET" == "Y" ]]; then
   echo "CONFIG_IP6_NF_TARGET_MASQUERADE=y" >> "$DEFCONFIG_FILE"
   #由于部分机型的vintf兼容性检测规则，在开启CONFIG_IP6_NF_NAT后开机会出现"您的设备内部出现了问题。请联系您的设备制造商了解详情。"的提示，故添加一个配置修复补丁，在编译内核时隐藏CONFIG_IP6_NF_NAT=y但不影响对应功能编译
   cd common
-  wget https://github.com/cctv18/oppo_oplus_realme_sm8750/raw/refs/heads/main/other_patch/config.patch
+  wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/other_patch/config.patch
   patch -p1 -F 3 < config.patch || true
   cd ..
 fi
@@ -320,14 +320,14 @@ if [[ "$APPLY_DROIDSPACES" == [sSeE] ]]; then
   echo "CONFIG_NTSYNC=y" >> "$DEFCONFIG_FILE"
   cd common
   # 应用 Droidspaces 容器必须补丁
-  wget https://github.com/cctv18/oppo_oplus_realme_sm8750/raw/refs/heads/main/droidspaces_patch/fix_sysvipc_kabi_6_7_8.patch
+  wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/fix_sysvipc_kabi_6_7_8.patch
   patch -p1 -F 3 < fix_sysvipc_kabi_6_7_8.patch || true
   # 修补 oplus_bsp_midas 行为，避免开机崩溃
-  wget https://github.com/cctv18/oppo_oplus_realme_sm8750/raw/refs/heads/main/droidspaces_patch/fix_oplus_bsp_midas.patch
+  wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/fix_oplus_bsp_midas.patch
   patch -p1 -F 3 < fix_oplus_bsp_midas.patch || true
   # 应用 NTSync 补丁
-  wget https://github.com/cctv18/oppo_oplus_realme_sm8750/raw/refs/heads/main/droidspaces_patch/ntsync_base.patch
-  wget https://github.com/cctv18/oppo_oplus_realme_sm8750/raw/refs/heads/main/droidspaces_patch/ntsync_compat_android15-6.6.patch
+  wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/ntsync_base.patch
+  wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/ntsync_compat_android15-6.6.patch
   patch -p1 -F 3 < ntsync_base.patch || true
   patch -p1 -F 3 < ntsync_compat_android15-6.6.patch || true
   cd ..
@@ -340,7 +340,7 @@ if [[ "$APPLY_DROIDSPACES" == [sSeE] ]]; then
     # 添加 Lindroid EVDI DRM 驱动
     echo "CONFIG_DRM_LINDROID_EVDI=y" >> "$DEFCONFIG_FILE"
     cd common
-    wget https://github.com/cctv18/oppo_oplus_realme_sm8750/raw/refs/heads/main/droidspaces_patch/evdi_drm.patch
+    wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/evdi_drm.patch
     patch -p1 -F 3 < evdi_drm.patch || true
     cd ..
   fi
@@ -409,7 +409,7 @@ cd "$WORKDIR/kernel_workspace/AnyKernel3"
 
 # ===== 如果启用 lz4kd，则下载 zram.zip 并放入当前目录 =====
 if [[ "$APPLY_LZ4KD" == "y" || "$APPLY_LZ4KD" == "Y" ]]; then
-  wget https://raw.githubusercontent.com/cctv18/oppo_oplus_realme_sm8750/refs/heads/main/zram.zip
+  wget https://raw.githubusercontent.com/Alhkxsj/oplus_kernel_plc110/refs/heads/main/zram.zip
 fi
 
 if [[ "$USE_PATCH_LINUX" == [yY] ]]; then
