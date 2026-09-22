@@ -487,8 +487,6 @@ jobs:
             echo "CONFIG_SYSVIPC=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_DEVTMPFS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_NAMESPACES=y" >> ./arch/arm64/configs/gki_defconfig
-            echo "CONFIG_USER_NS=y" >> ./arch/arm64/configs/gki_defconfig
-            echo "CONFIG_BTRFS_FS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_POSIX_MQUEUE=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_TARGET_LOG=y" >> ./arch/arm64/configs/gki_defconfig
