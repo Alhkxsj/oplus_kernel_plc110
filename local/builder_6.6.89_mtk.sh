@@ -15,6 +15,8 @@ read -p "是否启用susfs？(y/n，默认：y): " APPLY_SUSFS
 APPLY_SUSFS=${APPLY_SUSFS:-y}
 read -p "是否启用 KPM？(y-启用 KpatchNext独立kpm实现, n-关闭kpm，默认：n): " USE_PATCH_LINUX
 USE_PATCH_LINUX=${USE_PATCH_LINUX:-n}
+read -p "一键伪装 /proc/version（贴入原厂 cat /proc/version 输出，留空跳过）: " SPOOF_VERSION
+
 read -p "KSU分支版本(r=BakaSU, y=SukiSU Ultra, n=KernelSU Next, k=KSU, l=lkm模式(无内置KSU), 默认：r): " KSU_BRANCH
 KSU_BRANCH=${KSU_BRANCH:-r}
 read -p "是否应用 lz4 1.10.0 & zstd 1.5.7 补丁？(y/n，默认：y): " APPLY_LZ4
@@ -368,6 +370,39 @@ fi
 # ===== 禁用 defconfig 检查 =====
 echo ">>> 禁用 defconfig 检查..."
 sed -i 's/check_defconfig//' ./common/build.config.gki
+
+# ===== 一键伪装 /proc/version =====
+if [[ -n "$SPOOF_VERSION" ]]; then
+  echo ">>> 已启用一键伪装，解析贴入字符串..."
+  SPOOF="$SPOOF_VERSION"
+  RELEASE=$(echo "$SPOOF" | sed -nE 's/^Linux version ([^ ]+) .*/\1/p')
+  BUILD_USER=$(echo "$SPOOF" | sed -nE 's/.*\(([^ @]+)@([^ )]+)\).*/\1/p')
+  BUILD_HOST=$(echo "$SPOOF" | sed -nE 's/.*\(([^ @]+)@([^ )]+)\).*/\2/p')
+  COMPILER=$(echo "$SPOOF" | sed -nE 's/.*\) \((.*)\) #.*/\1/p')
+  BUILD_VERSION=$(echo "$SPOOF" | sed -nE 's/.*\) #([0-9]+).*/\1/p')
+  BUILD_TIMESTAMP=$(echo "$SPOOF" | sed -nE 's/.*\) #[0-9]+ SMP PREEMPT (.*)$/\1/p')
+
+  echo "    release=$RELEASE"
+  echo "    user=$BUILD_USER host=$BUILD_HOST"
+  echo "    version=$BUILD_VERSION timestamp=$BUILD_TIMESTAMP"
+
+  # release → CONFIG_LOCALVERSION + setlocalversion
+  sudo sed -i "s|^CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=\"-${RELEASE}\"|" ./common/arch/arm64/configs/gki_defconfig
+  echo "CONFIG_LOCALVERSION_AUTO=n" >> ./common/arch/arm64/configs/gki_defconfig
+  sed -i "\$s|echo \"\\\$res\"|echo \"-${RELEASE}\"|" ./common/scripts/setlocalversion
+  sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
+
+  # USER/HOST/VERSION/TIMESTAMP → export（同进程后续 make 直接生效）
+  export KBUILD_BUILD_USER="$BUILD_USER"
+  export KBUILD_BUILD_HOST="$BUILD_HOST"
+  export KBUILD_BUILD_VERSION="$BUILD_VERSION"
+  export KBUILD_BUILD_TIMESTAMP="$BUILD_TIMESTAMP"
+
+  # COMPILER → patch mkcompile_h 写死
+  sed -i "s|.*#define LINUX_COMPILER.*|#define LINUX_COMPILER \"${COMPILER}\"|" ./common/scripts/mkcompile_h
+  echo ">>> 伪装完成"
+fi
+
 
 # ===== 编译内核 =====
 echo ">>> 开始编译内核..."
