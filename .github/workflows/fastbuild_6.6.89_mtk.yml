@@ -564,11 +564,10 @@ jobs:
           cd kernel_workspace
           SPOOF="${{ github.event.inputs.spoof_version }}"
           echo "已启用一键伪装，解析贴入字符串..."
-          # 解析字段：Linux version <release> (<USER>@<HOST>) (<COMPILER>) #<VER> SMP PREEMPT <TIMESTAMP>
+          # Linux version <release> (<USER>@<HOST>) (<COMPILER>) #<VER> SMP PREEMPT <TIMESTAMP>
           RELEASE=$(echo "$SPOOF" | sed -nE 's/^Linux version ([^ ]+) .*/\1/p')
           BUILD_USER=$(echo "$SPOOF" | sed -nE 's/.*\(([^ @]+)@([^ )]+)\).*/\1/p')
           BUILD_HOST=$(echo "$SPOOF" | sed -nE 's/.*\(([^ @]+)@([^ )]+)\).*/\2/p')
-          # 编译器段：最后一个 ") " 之前那一对括号内（贪心，因为编译器段含嵌套括号）
           COMPILER=$(echo "$SPOOF" | sed -nE 's/.*\) \((.*)\) #.*/\1/p')
           BUILD_VERSION=$(echo "$SPOOF" | sed -nE 's/.*\) #([0-9]+).*/\1/p')
           BUILD_TIMESTAMP=$(echo "$SPOOF" | sed -nE 's/.*\) #[0-9]+ SMP PREEMPT (.*)$/\1/p')
@@ -577,19 +576,19 @@ jobs:
           echo "user=$BUILD_USER host=$BUILD_HOST"
           echo "version=$BUILD_VERSION timestamp=$BUILD_TIMESTAMP"
 
-          # 1) release → CONFIG_LOCALVERSION + setlocalversion
+          # release: CONFIG_LOCALVERSION + setlocalversion
           sudo sed -i "s|^CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=\"-${RELEASE}\"|" ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_LOCALVERSION_AUTO=n" >> ./common/arch/arm64/configs/gki_defconfig
           sed -i "\$s|echo \"\\\$res\"|echo \"-${RELEASE}\"|" ./common/scripts/setlocalversion
           sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
 
-          # 2) USER/HOST/VERSION/TIMESTAMP → GITHUB_ENV（跨 step 保留）
+          # USER/HOST/VERSION/TIMESTAMP: KBUILD_BUILD_* env
           echo "KBUILD_BUILD_USER=$BUILD_USER" >> $GITHUB_ENV
           echo "KBUILD_BUILD_HOST=$BUILD_HOST" >> $GITHUB_ENV
           echo "KBUILD_BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
           echo "KBUILD_BUILD_TIMESTAMP=$BUILD_TIMESTAMP" >> $GITHUB_ENV
 
-          # 3) COMPILER → patch mkcompile_h 写死（唯一 env 改不了的字段）
+          # COMPILER: mkcompile_h 无 env 入口，直接 patch
           sed -i "s|.*#define LINUX_COMPILER.*|#define LINUX_COMPILER \"${COMPILER}\"|" ./common/scripts/mkcompile_h
           echo "伪装完成"
       - name: 构建内核

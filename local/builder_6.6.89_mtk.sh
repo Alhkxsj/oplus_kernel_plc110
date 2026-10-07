@@ -373,8 +373,9 @@ sed -i 's/check_defconfig//' ./common/build.config.gki
 
 # ===== 一键伪装 /proc/version =====
 if [[ -n "$SPOOF_VERSION" ]]; then
-  echo ">>> 已启用一键伪装，解析贴入字符串..."
+  echo ">>> 一键伪装 /proc/version..."
   SPOOF="$SPOOF_VERSION"
+  # Linux version <release> (<USER>@<HOST>) (<COMPILER>) #<VER> SMP PREEMPT <TIMESTAMP>
   RELEASE=$(echo "$SPOOF" | sed -nE 's/^Linux version ([^ ]+) .*/\1/p')
   BUILD_USER=$(echo "$SPOOF" | sed -nE 's/.*\(([^ @]+)@([^ )]+)\).*/\1/p')
   BUILD_HOST=$(echo "$SPOOF" | sed -nE 's/.*\(([^ @]+)@([^ )]+)\).*/\2/p')
@@ -382,26 +383,26 @@ if [[ -n "$SPOOF_VERSION" ]]; then
   BUILD_VERSION=$(echo "$SPOOF" | sed -nE 's/.*\) #([0-9]+).*/\1/p')
   BUILD_TIMESTAMP=$(echo "$SPOOF" | sed -nE 's/.*\) #[0-9]+ SMP PREEMPT (.*)$/\1/p')
 
-  echo "    release=$RELEASE"
-  echo "    user=$BUILD_USER host=$BUILD_HOST"
+  echo "    release=$RELEASE user=$BUILD_USER@$BUILD_HOST"
   echo "    version=$BUILD_VERSION timestamp=$BUILD_TIMESTAMP"
 
-  # release → CONFIG_LOCALVERSION + setlocalversion
+  # release
   sudo sed -i "s|^CONFIG_LOCALVERSION=.*|CONFIG_LOCALVERSION=\"-${RELEASE}\"|" ./common/arch/arm64/configs/gki_defconfig
   echo "CONFIG_LOCALVERSION_AUTO=n" >> ./common/arch/arm64/configs/gki_defconfig
   sed -i "\$s|echo \"\\\$res\"|echo \"-${RELEASE}\"|" ./common/scripts/setlocalversion
   sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
 
-  # USER/HOST/VERSION/TIMESTAMP → export（同进程后续 make 直接生效）
+  # USER/HOST/VERSION/TIMESTAMP
   export KBUILD_BUILD_USER="$BUILD_USER"
   export KBUILD_BUILD_HOST="$BUILD_HOST"
   export KBUILD_BUILD_VERSION="$BUILD_VERSION"
   export KBUILD_BUILD_TIMESTAMP="$BUILD_TIMESTAMP"
 
-  # COMPILER → patch mkcompile_h 写死
+  # COMPILER (mkcompile_h 无 env 入口)
   sed -i "s|.*#define LINUX_COMPILER.*|#define LINUX_COMPILER \"${COMPILER}\"|" ./common/scripts/mkcompile_h
   echo ">>> 伪装完成"
 fi
+
 
 
 # ===== 编译内核 =====
