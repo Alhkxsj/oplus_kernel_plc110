@@ -214,8 +214,7 @@ if [[ "$APPLY_SUSFS" == [yY] ]]; then
   echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSU_DEFAULT_MOUNT=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> "$DEFCONFIG_FILE"
-  echo "CONFIG_KSU_SUSFS_TRY_UMOUNT=y" >> "$DEFCONFIG_FILE"
-  echo "CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT=y" >> "$DEFCONFIG_FILE"
+  echo "CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT=n" >> "$DEFCONFIG_FILE"
   echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> "$DEFCONFIG_FILE"
@@ -377,8 +376,9 @@ make -j$(nproc --all) LLVM=-18 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS
 echo ">>> 内核编译成功！"
 
 # ===== 选择使用 patch_linux (KPM补丁)=====
+# KPN 与 BakaSU/SukiSU/ksunext 内置 kpm 互斥，仅 k(原版KSU) 或 l(lkm/none) 时允许
 OUT_DIR="$WORKDIR/kernel_workspace/common/out/arch/arm64/boot"
-if [[ "$USE_PATCH_LINUX" == [yY] ]]; then
+if [[ "$USE_PATCH_LINUX" == [yY] && ( "$KSU_BRANCH" == [kK] || "$KSU_BRANCH" == [lL] ) ]]; then
   echo ">>> 使用 kptools-linux 工具处理输出..."
   cd "$OUT_DIR"
   wget https://github.com/KernelSU-Next/KPatch-Next/releases/latest/download/kptools-linux
