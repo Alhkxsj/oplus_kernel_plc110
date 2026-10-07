@@ -1,29 +1,43 @@
 # oplus_kernel_plc110
 
-一加 Ace 5 至尊版 (PLC110) 天玑 9400+ 6.6.89 内核编译脚本
-
-> 基于 [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) 项目
+一加 Ace 5 至尊版 (PLC110) 天玑 9400+ 6.6.89 (MT6991) 内核构建仓库。
 
 ## 支持机型
-- 一加 Ace 5 至尊版 (PLC110) - 天玑 9400+ (MT6991)
 
-## 功能特性
-- OKI 官方内核编译（基于一加 Ace5 至尊版 6.6.89 源码）
-- 风驰 scx 调速器移植
-- 多版本 KSU 可选（ReSukiSU/SukiSU Ultra/KernelSU Next）
-- ccache-ECS 缓存优化，编译时间约 6min
-- O2 编译优化
-- lz4/zstd 算法更新补丁
-- BBR/Brutal TCP 拥塞控制
-- Droidspaces 容器化支持
-- 内核防格基带保护
+- 一加 Ace 5 至尊版 (PLC110) — 天玑 9400+ (MT6991)，Android 15 / 16 通用
 
-## 编译方式
-- GitHub Action 在线编译
-- Shell 本地编译（`local/builder_6.6.89_mtk.sh`）
+## 功能
+
+- 基于一加官方 6.6.89 OKI 内核源码
+- 内置风驰 (hmbird) 调度器（含修复）
+- BakaSU / SukiSU / KernelSU Next / 原版 KSU / 无 KSU 五选一
+- SUSFS 隐藏（与 Droidspaces 容器兼容，try_umount 冲突已解决）
+- lz4 1.10.0 + zstd 1.5.7 算法更新
+- ADIOS IO 调度器、Re-Kernel、BBR / Brutal
+- Droidspaces 容器（standard / extend）
+- Baseband-guard 基带保护
+- CVE-2026-43499 (GhostLock) rtmutex 修复
+- KASAN / PAGE_OWNER 关闭，回收约 450MB slab
+- /proc/version 一键伪装（spoof_version）
+- ccache 缓存，O2 优化，约 6 分钟出包
+
+## 编译
+
+GitHub Actions：仓库 Actions → Run workflow，按选项填写。
+
+本地：`local/builder_6.6.89_mtk.sh`
+
+刷入：AnyKernel3 刷机包，TWRP / HorizonKernelFlasher / KSU 管理器均可。
+
+## 内核源码
+
+[Alhkxsj/android_kernel_oneplus_mt6991](https://github.com/Alhkxsj/android_kernel_oneplus_mt6991) — 分支 `oneplus/mt6991_v_15.0.2_ace5_ultra_6.6.89`
 
 ## 鸣谢
-- [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) - 原始项目
-- [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU)
+
+- [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) — 原始构建脚本
+- [OnePlusOSS](https://github.com/OnePlusOSS/android_kernel_oneplus_mt6991) — 内核源码
+- [BakaSU](https://github.com/Baka-SU/BakaSU)
 - [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra)
 - [KernelSU Next](https://github.com/pershoot/KernelSU-Next)
+- [KernelSU](https://github.com/tiann/KernelSU)
