@@ -475,11 +475,15 @@ jobs:
             cd kernel_workspace/common
             # SYSVIPC kABI 补丁：把 sysvsem/sysvshm 放进 KABI reserve 槽位，
             # 保证 task_struct 偏移不变，否则 vendor 模块加载失败 bootloop
+            # 不加 || true：此补丁是开机前提，静默失败会导致 bootloop
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/fix_sysvipc_kabi_6_7_8.patch
-            patch -p1 -F 3 < fix_sysvipc_kabi_6_7_8.patch || true
+            patch -p1 -F 3 < fix_sysvipc_kabi_6_7_8.patch
             # 修补 oplus_bsp_midas 行为，避免开机崩溃
+            # USER_NS 下命名空间内进程 find_task_by_vpid 返回 NULL，
+            # oplus_bsp_midas 未判空直接解引用；此补丁返回 ghost task 兜底。
+            # 不加 || true：该补丁是 USER_NS 能开机的前提，静默失败会导致 bootloop
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/fix_oplus_bsp_midas.patch
-            patch -p1 -F 3 < fix_oplus_bsp_midas.patch || true
+            patch -p1 -F 3 < fix_oplus_bsp_midas.patch
             # 应用 NTSync 补丁
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/ntsync_base.patch
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/ntsync_compat_${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch
@@ -488,6 +492,7 @@ jobs:
             # 开启 Droidspaces 容器所需内核支持
             echo "CONFIG_PID_NS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_IPC_NS=y" >> ./arch/arm64/configs/gki_defconfig
+            echo "CONFIG_USER_NS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_SYSVIPC=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_DEVTMPFS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_NAMESPACES=y" >> ./arch/arm64/configs/gki_defconfig

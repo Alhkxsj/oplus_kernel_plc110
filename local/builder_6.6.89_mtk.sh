@@ -309,6 +309,7 @@ if [[ "$APPLY_DROIDSPACES" == [sSeE] ]]; then
   # 开启 Droidspaces 容器所需内核支持
   echo "CONFIG_PID_NS=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_IPC_NS=y" >> "$DEFCONFIG_FILE"
+  echo "CONFIG_USER_NS=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_SYSVIPC=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_DEVTMPFS=y" >> "$DEFCONFIG_FILE"
   echo "CONFIG_NAMESPACES=y" >> "$DEFCONFIG_FILE"
@@ -321,10 +322,12 @@ if [[ "$APPLY_DROIDSPACES" == [sSeE] ]]; then
   cd common
   # SYSVIPC kABI 补丁：保证 task_struct 偏移不变，否则 vendor 模块加载失败
   wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/fix_sysvipc_kabi_6_7_8.patch
-  patch -p1 -F 3 < fix_sysvipc_kabi_6_7_8.patch || true
+  patch -p1 -F 3 < fix_sysvipc_kabi_6_7_8.patch
   # 修补 oplus_bsp_midas 行为，避免开机崩溃
+  # USER_NS 下命名空间内进程 find_task_by_vpid 返回 NULL，oplus_bsp_midas
+  # 未判空直接解引用。此补丁返回 ghost task 兜底，是 USER_NS 能开机的前提
   wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/fix_oplus_bsp_midas.patch
-  patch -p1 -F 3 < fix_oplus_bsp_midas.patch || true
+  patch -p1 -F 3 < fix_oplus_bsp_midas.patch
   # 应用 NTSync 补丁
   wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/ntsync_base.patch
   wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/ntsync_compat_android15-6.6.patch
