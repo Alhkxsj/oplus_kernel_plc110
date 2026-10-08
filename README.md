@@ -4,7 +4,7 @@
 
 ## 支持机型
 
-- 一加 Ace 5 至尊版 (PLC110) — 天玑 9400+ (MT6991)，Android 15 / 16 通用
+- 一加 Ace 5 至尊版 (PLC110) — 天玑 9400+ (MT6991)
 
 ## 功能
 
@@ -17,9 +17,8 @@
 - Droidspaces 容器（standard / extend）
 - Baseband-guard 基带保护
 - CVE-2026-43499 (GhostLock) rtmutex 修复
-- KASAN / PAGE_OWNER 关闭，回收约 450MB slab
 - /proc/version 一键伪装（spoof_version）
-- ccache 缓存，O2 优化，约 6 分钟出包
+- ccache 缓存，O2 优化
 
 ## 编译
 
