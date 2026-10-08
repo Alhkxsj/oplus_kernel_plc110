@@ -23,7 +23,7 @@ index 0c5e545..c124afb 100644
  
  struct pid init_struct_pid = {
  	.count		= REFCOUNT_INIT(1),
-@@ -89,6 +92,30 @@ struct pid_namespace init_pid_ns = {
+@@ -89,6 +92,27 @@ struct pid_namespace init_pid_ns = {
  };
  EXPORT_SYMBOL_GPL(init_pid_ns);
  
@@ -38,15 +38,12 @@ index 0c5e545..c124afb 100644
 +void __init init_ghost_task(void)
 +{
 +	memcpy(&ghost_task, &init_task, sizeof(struct task_struct));
-+	
-+	strncpy(ghost_task.comm, "ghost-task-sentinel", TASK_COMM_LEN);
++
++	strscpy(ghost_task.comm, "ghost-task", TASK_COMM_LEN);
 +	ghost_task.pid = -1;
 +	ghost_task.tgid = -1;
 +
 +	set_task_usage(ghost_task.usage, 1000);
-+#ifdef CONFIG_REFCOUNT_FULL
-+	refcount_set(&ghost_task.refcount, 1000);
-+#endif
 +
 +	ghost_task_ready = true;
 +}
@@ -54,7 +51,7 @@ index 0c5e545..c124afb 100644
  /*
   * Note: disable interrupts while the pidmap_lock is held as an
   * interrupt might come in and do read_lock(&tasklist_lock).
-@@ -422,7 +449,24 @@ struct task_struct *find_task_by_pid_ns(pid_t nr, struct pid_namespace *ns)
+@@ -422,7 +446,24 @@ struct task_struct *find_task_by_pid_ns(pid_t nr, struct pid_namespace *ns)
  
  struct task_struct *find_task_by_vpid(pid_t vnr)
  {
