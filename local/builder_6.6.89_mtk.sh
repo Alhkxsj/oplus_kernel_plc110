@@ -319,6 +319,9 @@ if [[ "$APPLY_DROIDSPACES" == [sSeE] ]]; then
   # 开启 NTSync
   echo "CONFIG_NTSYNC=y" >> "$DEFCONFIG_FILE"
   cd common
+  # SYSVIPC kABI 补丁：保证 task_struct 偏移不变，否则 vendor 模块加载失败
+  wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/fix_sysvipc_kabi_6_7_8.patch
+  patch -p1 -F 3 < fix_sysvipc_kabi_6_7_8.patch || true
   # 修补 oplus_bsp_midas 行为，避免开机崩溃
   wget https://github.com/Alhkxsj/oplus_kernel_plc110/raw/refs/heads/main/droidspaces_patch/fix_oplus_bsp_midas.patch
   patch -p1 -F 3 < fix_oplus_bsp_midas.patch || true

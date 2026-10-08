@@ -473,6 +473,10 @@ jobs:
           if [[ "${{ github.event.inputs.droidspaces_enable }}" != "false" ]]; then
             echo "正在启用 Droidspaces 容器支持..."
             cd kernel_workspace/common
+            # SYSVIPC kABI 补丁：把 sysvsem/sysvshm 放进 KABI reserve 槽位，
+            # 保证 task_struct 偏移不变，否则 vendor 模块加载失败 bootloop
+            wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/fix_sysvipc_kabi_6_7_8.patch
+            patch -p1 -F 3 < fix_sysvipc_kabi_6_7_8.patch || true
             # 修补 oplus_bsp_midas 行为，避免开机崩溃
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/fix_oplus_bsp_midas.patch
             patch -p1 -F 3 < fix_oplus_bsp_midas.patch || true
