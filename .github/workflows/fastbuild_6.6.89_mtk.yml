@@ -583,10 +583,21 @@ jobs:
           sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
 
           # USER/HOST/VERSION/TIMESTAMP: KBUILD_BUILD_* env
-          echo "KBUILD_BUILD_USER=$BUILD_USER" >> $GITHUB_ENV
-          echo "KBUILD_BUILD_HOST=$BUILD_HOST" >> $GITHUB_ENV
-          echo "KBUILD_BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
-          echo "KBUILD_BUILD_TIMESTAMP=$BUILD_TIMESTAMP" >> $GITHUB_ENV
+          # 多行 heredoc 格式，值含空格也安全
+          {
+            echo "KBUILD_BUILD_USER<<EOF"
+            echo "$BUILD_USER"
+            echo "EOF"
+            echo "KBUILD_BUILD_HOST<<EOF"
+            echo "$BUILD_HOST"
+            echo "EOF"
+            echo "KBUILD_BUILD_VERSION<<EOF"
+            echo "$BUILD_VERSION"
+            echo "EOF"
+            echo "KBUILD_BUILD_TIMESTAMP<<EOF"
+            echo "$BUILD_TIMESTAMP"
+            echo "EOF"
+          } >> $GITHUB_ENV
 
           # COMPILER: mkcompile_h 无 env 入口，直接 patch
           sed -i "s|.*#define LINUX_COMPILER.*|#define LINUX_COMPILER \"${COMPILER}\"|" ./common/scripts/mkcompile_h
