@@ -14,12 +14,22 @@
 
 定期从 stable 6.6.y backport CVE 修复。重点关注 UAF、race、提权类。
 
-已合入：
+已合入（commit `f5d6ab3fb`，已开机验证）：
 - CVE-2026-43499 rtmutex（含后续 40a25d59e85b 空指针守卫）
 - CVE-2026-46242 epoll ep_remove UAF + ep_free kfree_rcu
 - CVE-2026-53266 ebt_snat ARP 写越界
 - CVE-2026-23111 nftables catchall genmask 反转
 - hmbird.h 序列点 UB 修复
+
+已合入（commit `fd8d7cb3a`，已开机验证）：
+- af_unix UAF tail->len（上游 be309f8eae8b）
+- fs/buffer bh_read UAF（上游 7375f22495e7）
+- ext4 hole length 溢出（上游 02c7f7219ac0）
+- ebtables compat_mtw OOB（上游 f438d1786d65）
+- ipv6 mcast MLD UAF（上游 791c91dc7a9d）
+- ctnetlink refcount 泄漏（上游 de788b2e6227）
+- blk-cgroup rstat flush UAF（上游 0ab5ee5a1bad）
+- xfrm policy inexact bin UAF（上游 7f2d76c9c032）
 
 跟进方式：拉取 stable 6.6.y changelog，逐条核对是否已合，未合的按本仓库风格适配后提交。适配要点见下文「backport 规范」。
 
