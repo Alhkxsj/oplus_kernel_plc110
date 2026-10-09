@@ -389,11 +389,7 @@ jobs:
           sed -i 's/check_defconfig//' ./common/build.config.gki
           #跳过将uapi标准头安装到 usr/include 目录的不必要操作，节省编译时间
           echo "CONFIG_HEADERS_INSTALL=n" >> ./common/arch/arm64/configs/gki_defconfig
-          # 应用 CVE_2026_43499 修复补丁
-          cd common
-          wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/other_patch/cve-2026-43499-rtmutex-6.6.patch
-          patch -p1 -F 3 < cve-2026-43499-rtmutex-6.6.patch
-          
+
       - name: 启用网络功能增强优化配置
         if: inputs.better_net
         run: |
@@ -759,13 +755,11 @@ jobs:
             FULL_VERSION=${{ env.KERNEL_VERSION }}.${CLEAN_SUB_VERSION}-${{ env.KERNEL_NAME }}
           fi
           TIME_NOW="$(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')"
-          cat > ./ak3.log <<LOGEOF
-Author: Axi
-Kernel: $FULL_VERSION
-KSU: ${KSU_TYPENAME} ${KSUVER}
-Build: $TIME_NOW
-Commit: $GITHUB_SHA
-LOGEOF
+          echo "Author: Axi" > ./ak3.log
+          echo "Kernel: $FULL_VERSION" >> ./ak3.log
+          echo "KSU: ${KSU_TYPENAME} ${KSUVER}" >> ./ak3.log
+          echo "Build: $TIME_NOW" >> ./ak3.log
+          echo "Commit: $GITHUB_SHA" >> ./ak3.log
           zip -z ../$AK3_NAME < ./ak3.log
 
       - name: 上传 Ccache 调试日志
