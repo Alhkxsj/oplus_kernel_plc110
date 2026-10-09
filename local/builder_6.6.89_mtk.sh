@@ -428,7 +428,7 @@ fi
 # ===== 克隆并打包 AnyKernel3 =====
 cd "$WORKDIR/kernel_workspace"
 echo ">>> 克隆 AnyKernel3 项目..."
-git clone https://github.com/cctv18/AnyKernel3 --depth=1
+git clone https://github.com/Alhkxsj/AnyKernel3 --depth=1
 
 echo ">>> 清理 AnyKernel3 Git 信息..."
 rm -rf ./AnyKernel3/.git

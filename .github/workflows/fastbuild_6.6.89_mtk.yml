@@ -95,6 +95,11 @@ on:
         required: false
         type: string
         default: ''
+      release_enable:
+        description: '是否发布 Release（勾选才发布，否则只上传 Artifact）'
+        required: true
+        type: boolean
+        default: 'false'
       spoof_version:
         description: '一键伪装 /proc/version：贴入原厂完整字符串（cat /proc/version 输出），编译产物刷入后 /proc/version 与其逐字符一致。留空不伪装，走 kernel_suffix 个性化。填了此项则 kernel_suffix 被忽略。'
         required: false
@@ -713,7 +718,7 @@ jobs:
         id: create_zip
         run: |
           cd kernel_workspace
-          git clone https://github.com/cctv18/AnyKernel3 --depth=1
+          git clone https://github.com/Alhkxsj/AnyKernel3 --depth=1
           rm -rf ./AnyKernel3/.git
           cd AnyKernel3
           cp ../common/out/arch/arm64/boot/Image ./Image
@@ -778,6 +783,7 @@ jobs:
 
   release:
     needs: build
+    if: ${{ inputs.release_enable == true }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
