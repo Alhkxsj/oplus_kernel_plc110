@@ -4,8 +4,8 @@
 
 ## 约束
 
-- **KASAN / KASAN_HW_TAGS 绝对不能关**。此设备依赖硬件标签 KASAN 做内存安全引导，关掉会无法开机。
-- PAGE_OWNER / PAGE_PINNER / KFENCE / UBSAN 可按需关，不影响启动。
+- **所有调试/安全相关 CONFIG 一律不改，不关、不调。** 包括但不限于：KASAN / KASAN_HW_TAGS / PAGE_OWNER / PAGE_PINNER / KFENCE / UBSAN / DEBUG_MEMORY_INIT。
+- 实测结论：这些项即便上游/社区文档说"可关"，在本设备上关掉会无法开机。不逐条赌，全部保留现状。
 - SUSFS / KSU / HMBIRD 均为构建时外部 patch 注入，不在内核源码仓库内，源码层不动。
 
 ## 路线
@@ -25,13 +25,7 @@
 
 ### 2. 性能
 
-可关的调试开销：
-- PAGE_OWNER / PAGE_PINNER → 关
-- KFENCE → 关或拉大采样间隔
-- DEBUG_MEMORY_INIT → 关
-- UBSAN → 视 vendor 需求
-
-保留：KASAN / KASAN_HW_TAGS（见约束）。
+CONFIG 调试开关一律不动（见约束）。
 
 I/O 与压缩：
 - 追 ADIOS 调度器上游更新
