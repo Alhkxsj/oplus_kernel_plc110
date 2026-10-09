@@ -17,6 +17,9 @@
 - Droidspaces 容器（standard / extend）
 - Baseband-guard 基带保护
 - CVE-2026-43499 (GhostLock) rtmutex 修复
+- CVE-2026-46242 epoll ep_remove UAF 修复
+- CVE-2026-53266 ebt_snat ARP 写越界修复
+- CVE-2026-23111 nftables catchall genmask 反转修复
 - /proc/version 一键伪装（spoof_version）
 - ccache 缓存，O2 优化
 
