@@ -485,5 +485,14 @@ ZIP_NAME="${ZIP_NAME}-v$(date +%Y%m%d).zip"
 echo ">>> 打包文件: $ZIP_NAME"
 zip -r "../$ZIP_NAME" ./*
 
+# AK3 zip 注释
+FULL_VERSION="${MANIFEST}-$(date +%Y%m%d)"
+cat > ./ak3.log <<LOGEOF
+Author: Axi
+Kernel: $FULL_VERSION
+Build: $(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')
+LOGEOF
+zip -z "../$ZIP_NAME" < ./ak3.log
+
 ZIP_PATH="$(realpath "../$ZIP_NAME")"
 echo ">>> 打包完成 文件所在目录: $ZIP_PATH"
