@@ -16,10 +16,19 @@
 - ADIOS IO 调度器、Re-Kernel、BBR / Brutal
 - Droidspaces 容器（standard / extend）
 - Baseband-guard 基带保护
-- CVE-2026-43499 (GhostLock) rtmutex 修复
-- CVE-2026-46242 epoll ep_remove UAF 修复
-- CVE-2026-53266 ebt_snat ARP 写越界修复
+- CVE-2026-43499 (GhostLock) rtmutex waiter::task 修复
+- CVE-2026-46242 epoll ep_remove UAF + ep_free kfree_rcu 修复
+- CVE-2026-53266 ebt_snat ARP SHA 写越界修复
 - CVE-2026-23111 nftables catchall genmask 反转修复
+- af_unix UAF tail->len 修复
+- fs/buffer bh_read UAF 修复
+- ext4 hole length 整数溢出修复
+- ebtables compat_mtw OOB read 修复
+- ipv6 mcast MLD query UAF 修复
+- ctnetlink refcount 泄漏修复
+- blk-cgroup rstat flush UAF 修复
+- xfrm policy inexact bin UAF 修复
+- hmbird.h 序列点 UB 修复
 - /proc/version 一键伪装（spoof_version）
 - ccache 缓存，O2 优化
 
