@@ -19,6 +19,9 @@ OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 - /proc/version spoof
 - Optional release publishing
 - AnyKernel3 (own fork)
+- SECURITY_YAMA (ptrace restriction)
+- BTRFS + NTFS3 filesystem support
+- ZRAM built-in
 
 ## Kernel fixes
 
