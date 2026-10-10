@@ -1,86 +1,84 @@
 # oplus_kernel_plc110
 
-一加 Ace 5 至尊版 (PLC110) 天玑 9400+ 6.6.89 (MT6991) 内核构建仓库。
+OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 
-## 支持机型
+## Device
 
-- 一加 Ace 5 至尊版 (PLC110) — 天玑 9400+ (MT6991)
+- OnePlus Ace 5 Ultra (PLC110) — Dimensity 9400+ (MT6991)
 
-## 功能
+## Features
 
-- 基于一加官方 6.6.89 OKI 内核源码
-- 风驰 (hmbird) 调度器
-- BakaSU / SukiSU / KernelSU Next / 原版 KSU / 无 KSU
-- SUSFS 隐藏
+- Based on OnePlus 6.6.89 OKI kernel source
+- Hmbird scheduler (with fixes)
+- BakaSU / SukiSU / KernelSU Next / KSU / None
+- SUSFS
 - lz4 1.10.0 + zstd 1.5.7
-- ADIOS IO 调度器、Re-Kernel、BBR / Brutal
-- Droidspaces 容器（standard / extend）
-- Baseband-guard 基带保护
-- /proc/version 一键伪装
-- Release 可选发布
+- ADIOS IO scheduler, Re-Kernel, BBR / Brutal
+- Droidspaces container (standard / extend)
+- Baseband-guard
+- /proc/version spoof
+- Optional release publishing
+- AnyKernel3 (own fork)
 
-## 安全修复
+## Kernel fixes (28 files, 252 insertions)
 
-### CVE（4 项）
+### CVE (4)
 
-- CVE-2026-43499 rtmutex waiter::task UAF
-- CVE-2026-46242 epoll ep_remove UAF
-- CVE-2026-53266 ebt_snat ARP 写越界
-- CVE-2026-23111 nftables catchall genmask 反转
+- CVE-2026-43499 rtmutex: `remove_waiter()` uses `waiter->task` instead of `current`; `rt_mutex_start_proxy_lock()` return check `ret < 0`; null waiter guard
+- CVE-2026-46242 epoll: `__ep_remove()` pins `@file` via `epi_fget()` before f_lock; `ep_free()` uses `kfree_rcu`; `WRITE_ONCE(epi->dying)` paired with reader
+- CVE-2026-53266 ebt_snat: `skb_ensure_writable()` before ARP SHA rewrite
+- CVE-2026-23111 nftables: `nft_map_catchall_deactivate()` genmask check fix
 
-### stable backport（8 项）
+### stable backport (8)
 
-- af_unix UAF tail->len
-- fs/buffer bh_read UAF
-- ext4 hole length 整数溢出
-- ebtables compat_mtw OOB read
-- ipv6 mcast MLD query UAF
-- ctnetlink refcount 泄漏
-- blk-cgroup rstat flush UAF
-- xfrm policy inexact bin UAF
+- af_unix: remove `tail->len` compare in `unix_stream_data_wait()` (be309f8eae8b)
+- buffer: `put_bh` moved before `__end_buffer_read_notouch()` (7375f22495e7)
+- ext4: `ext4_ind_map_blocks()` count→u64, m_len uses umin (02c7f7219ac0)
+- ebtables: `compat_mtw_from_user()` size validation (f438d1786d65)
+- ipv6 mcast: `__mld_query_work()` group value copy (791c91dc7a9d)
+- ctnetlink: refcount leak fix (de788b2e6227)
+- blk-cgroup: rstat flush UAF fix
+- xfrm: inexact bin UAF fix
 
-### f2fs（7 项）
+### f2fs (7)
 
-- write_end_io UAF node_inode
-- get_dnode_of_data OOB
-- corrupted nid 检测
-- __destroy_extent_node bug_on 删除
-- fiemap 边界处理
-- discard_cmd_cnt 竞态
-- multidev trace
-- pin file offset rounddown
+- `f2fs_write_end_io`: `f2fs_in_warm_node_list` before `dec_page_count` (2d9c4a4ed4ee)
+- `f2fs_get_dnode_of_data`: `nid == i_ino` validation (77de19b6867f)
+- `f2fs_alloc_nid`: `is_invalid_nid` check + `STOP_CP_REASON_CORRUPTED_NID` (8fc6056dcf7)
+- `__destroy_extent_node`: remove `f2fs_bug_on(node_cnt)`
+- `f2fs_map_blocks`: fiemap bounds fix (95e159ad3e52)
+- `f2fs/segment`: discard_cmd_cnt race fix
+- `f2fs/file`: pin file offset rounddown fix
 
-### virt/geniezone（3 项，backport 自 mt6993）
+### virt/geniezone (3, backport from mt6993)
 
-- vcpu 生命周期 UAF：kref 引用计数，vcpu create 时 get、release 时 put，vm 在最后一个引用释放时 destroy
-- ioeventfd 销毁泄漏：gzvm_destroy_vm 补 ioeventfd release
-- irqfd SRCU 泄漏：补 cleanup_srcu_struct
+- vcpu lifecycle UAF: kref refcount, vcpu create→get, release→put, vm destroy on last put
+- ioeventfd: `gzvm_vm_ioeventfd_release()` added to `gzvm_destroy_vm`
+- irqfd: `cleanup_srcu_struct()` added to `gzvm_vm_irqfd_release`
 
-> 保留 6.6.89 API，未引入 fd_file / eventfd_signal 单参数 / remove void 适配。
+### hmbird (6)
 
-### hmbird（6 项）
+- `set_audio_thread_sched_prop`: RCU UAF — `strcmp` moved into `rcu_read_lock` critical section
+- MT6991 topology: cpu6 `partial`→`big` (4×A520 + 3×A725 + 1×X925)
+- `hmbird_ops_disabling()`: stub `return false` → real state check
+- `init_child_tg`: `cgroup_put(NULL)` guard
+- heartbeat timeout: 2500ms→10000ms
+- `see = NULL` dead code removal
 
-- set_audio_thread_sched_prop RCU UAF
-- MT6991 集群拓扑 cpu6 partial→big
-- hmbird_ops_disabling stub 补全
-- cgroup_put(NULL) 防护
-- heartbeat 超时 2.5s→10s
-- see=NULL 死代码清理
+## Build
 
-## 编译
+GitHub Actions: Actions → Run workflow.
 
-GitHub Actions：Actions → Run workflow。
+Local: `local/builder_6.6.89_mtk.sh`
 
-本地：`local/builder_6.6.89_mtk.sh`
+## Source
 
-## 内核源码
+[Alhkxsj/android_kernel_oneplus_mt6991](https://github.com/Alhkxsj/android_kernel_oneplus_mt6991) — `oneplus/mt6991_v_15.0.2_ace5_ultra_6.6.89`
 
-[Alhkxsj/android_kernel_oneplus_mt6991](https://github.com/Alhkxsj/android_kernel_oneplus_mt6991) — 分支 `oneplus/mt6991_v_15.0.2_ace5_ultra_6.6.89`
+## Credits
 
-## 鸣谢
-
-- [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) — 构建脚本
-- [OnePlusOSS](https://github.com/OnePlusOSS/android_kernel_oneplus_mt6991) — 内核源码
+- [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750)
+- [OnePlusOSS](https://github.com/OnePlusOSS/android_kernel_oneplus_mt6991)
 - [BakaSU](https://github.com/Baka-SU/BakaSU)
 - [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra)
 - [KernelSU Next](https://github.com/pershoot/KernelSU-Next)
