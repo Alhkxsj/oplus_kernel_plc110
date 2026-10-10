@@ -147,7 +147,7 @@ cd "$WORKDIR/kernel_workspace"
 echo ">>> 应用 SUSFS&hook 补丁..."
 if [[ "$APPLY_SUSFS" == [yY] ]]; then
   echo ">>> 克隆补丁仓库..."
-  git clone --depth=1 https://github.com/cctv18/susfs4oki.git susfs4ksu -b oki-android15-6.6
+  git clone --depth=1 https://gitlab.com/simonpunk/susfs4ksu.git susfs4ksu -b gki-android15-6.6
   wget https://github.com/cctv18/oppo_oplus_realme_sm8650/raw/refs/heads/main/other_patch/69_hide_stuff.patch -O ./common/69_hide_stuff.patch
   cp ./susfs4ksu/kernel_patches/50_add_susfs_in_gki-android15-6.6.patch ./common/
   cp ./susfs4ksu/kernel_patches/fs/* ./common/fs/
