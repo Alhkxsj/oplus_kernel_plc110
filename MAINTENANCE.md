@@ -31,6 +31,16 @@
 - blk-cgroup rstat flush UAF（上游 0ab5ee5a1bad）
 - xfrm policy inexact bin UAF（上游 7f2d76c9c032）
 
+已合入（commit `619b50381`）：
+- f2fs write_end_io UAF node_inode（上游 2d9c4a4ed4ee）
+- f2fs get_dnode_of_data OOB（上游 77de19b6867f）
+- f2fs corrupted nid 检测（上游 8fc6056dcf7）
+- f2fs __destroy_extent_node bug_on 删除（上游 1f70ddb2，revert ed78aeebe）
+- f2fs fiemap 边界处理（上游 95e159ad3e52）
+- f2fs discard_cmd_cnt 竞态（上游 6af249c996f）
+- f2fs multidev trace 修复（上游 eb2ca3ca9835）
+- f2fs pin file offset rounddown（上游 4275b59673e）
+
 跟进方式：拉取 stable 6.6.y changelog，逐条核对是否已合，未合的按本仓库风格适配后提交。适配要点见下文「backport 规范」。
 
 ### 2. 性能

@@ -16,10 +16,16 @@
 - ADIOS IO 调度器、Re-Kernel、BBR / Brutal
 - Droidspaces 容器（standard / extend）
 - Baseband-guard 基带保护
+
+### 安全修复（共 22 项，均已开机验证）
+
+**CVE 修复（4 项）**
 - CVE-2026-43499 (GhostLock) rtmutex waiter::task 修复
 - CVE-2026-46242 epoll ep_remove UAF + ep_free kfree_rcu 修复
 - CVE-2026-53266 ebt_snat ARP SHA 写越界修复
 - CVE-2026-23111 nftables catchall genmask 反转修复
+
+**通用 stable 修复（8 项）**
 - af_unix UAF tail->len 修复
 - fs/buffer bh_read UAF 修复
 - ext4 hole length 整数溢出修复
@@ -28,6 +34,23 @@
 - ctnetlink refcount 泄漏修复
 - blk-cgroup rstat flush UAF 修复
 - xfrm policy inexact bin UAF 修复
+
+**f2fs 修复（7 项）**
+- f2fs write_end_io UAF node_inode 修复
+- f2fs get_dnode_of_data OOB 修复
+- f2fs corrupted nid 检测
+- f2fs __destroy_extent_node bug_on 删除
+- f2fs fiemap 边界处理
+- f2fs discard_cmd_cnt 竞态修复
+- f2fs multidev trace 修复
+- f2fs pin file offset rounddown 修复
+
+**virt/geniezone 修复（3 项）**
+- vcpu 生命周期 UAF（kref 引用计数）
+- ioeventfd 销毁未清理（内存泄漏）
+- irqfd SRCU 结构未清理
+
+**其他**
 - hmbird.h 序列点 UB 修复
 - /proc/version 一键伪装（spoof_version）
 - ccache 缓存，O2 优化
