@@ -71,7 +71,7 @@ GitHub Actions: Actions → Run workflow.
 
 Local: `local/builder_6.6.89_mtk.sh`
 
-## Source
+## kernel
 
 [Alhkxsj/android_kernel_oneplus_mt6991](https://github.com/Alhkxsj/android_kernel_oneplus_mt6991) — `oneplus/mt6991_v_15.0.2_ace5_ultra_6.6.89`
 
