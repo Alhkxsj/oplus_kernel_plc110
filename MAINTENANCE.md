@@ -8,72 +8,84 @@
 - 实测结论：这些项即便上游/社区文档说"可关"，在本设备上关掉会无法开机。不逐条赌，全部保留现状。
 - SUSFS / KSU / HMBIRD 均为构建时外部 patch 注入，不在内核源码仓库内，源码层不动。
 
-## 路线
+## 已完成
 
-### 1. 安全（最高优先级）
+### 安全 backport（22 项）
 
-定期从 stable 6.6.y backport CVE 修复。重点关注 UAF、race、提权类。
-
-已合入（commit `f5d6ab3fb`，已开机验证）：
+CVE 修复（commit `f5d6ab3fb`）：
 - CVE-2026-43499 rtmutex（含后续 40a25d59e85b 空指针守卫）
 - CVE-2026-46242 epoll ep_remove UAF + ep_free kfree_rcu
 - CVE-2026-53266 ebt_snat ARP 写越界
 - CVE-2026-23111 nftables catchall genmask 反转
 - hmbird.h 序列点 UB 修复
 
-已合入（commit `fd8d7cb3a`，已开机验证）：
-- af_unix UAF tail->len（上游 be309f8eae8b）
-- fs/buffer bh_read UAF（上游 7375f22495e7）
-- ext4 hole length 溢出（上游 02c7f7219ac0）
-- ebtables compat_mtw OOB（上游 f438d1786d65）
-- ipv6 mcast MLD UAF（上游 791c91dc7a9d）
-- ctnetlink refcount 泄漏（上游 de788b2e6227）
-- blk-cgroup rstat flush UAF（上游 0ab5ee5a1bad）
-- xfrm policy inexact bin UAF（上游 7f2d76c9c032）
+stable 8 项（commit `fd8d7cb3a`）：
+- af_unix UAF tail->len（be309f8eae8b）
+- fs/buffer bh_read UAF（7375f22495e7）
+- ext4 hole length 溢出（02c7f7219ac0）
+- ebtables compat_mtw OOB（f438d1786d65）
+- ipv6 mcast MLD UAF（791c91dc7a9d）
+- ctnetlink refcount 泄漏（de788b2e6227）
+- blk-cgroup rstat flush UAF（0ab5ee5a1bad）
+- xfrm policy inexact bin UAF（7f2d76c9c032）
 
-已合入（commit `619b50381`）：
-- f2fs write_end_io UAF node_inode（上游 2d9c4a4ed4ee）
-- f2fs get_dnode_of_data OOB（上游 77de19b6867f）
-- f2fs corrupted nid 检测（上游 8fc6056dcf7）
-- f2fs __destroy_extent_node bug_on 删除（上游 1f70ddb2，revert ed78aeebe）
-- f2fs fiemap 边界处理（上游 95e159ad3e52）
-- f2fs discard_cmd_cnt 竞态（上游 6af249c996f）
-- f2fs multidev trace 修复（上游 eb2ca3ca9835）
-- f2fs pin file offset rounddown（上游 4275b59673e）
+f2fs 7 项（commit `619b50381`）：
+- f2fs write_end_io UAF node_inode（2d9c4a4ed4ee）
+- f2fs get_dnode_of_data OOB（77de19b6867f）
+- f2fs corrupted nid 检测（8fc6056dcf7）
+- f2fs __destroy_extent_node bug_on 删除（1f70ddb2）
+- f2fs fiemap 边界处理（95e159ad3e52）
+- f2fs discard_cmd_cnt 竞态（6af249c996f）
+- f2fs multidev trace 修复（eb2ca3ca9835）
+- f2fs pin file offset rounddown（4275b59673e）
 
-跟进方式：拉取 stable 6.6.y changelog，逐条核对是否已合，未合的按本仓库风格适配后提交。适配要点见下文「backport 规范」。
+virt/geniezone 3 项（commit `c899081ec`，backport 自 mt6993）：
+- vcpu 生命周期 UAF（kref 引用计数）
+- ioeventfd 销毁泄漏
+- irqfd SRCU 泄漏
 
-### 2. 性能
+hmbird 6 项：
+- set_audio_thread_sched_prop RCU UAF
+- MT6991 集群拓扑 cpu6 partial→big
+- hmbird_ops_disabling stub 补全
+- cgroup_put(NULL) 防护
+- heartbeat 超时 2.5s→10s
+- see=NULL 死代码清理
 
-CONFIG 调试开关一律不动（见约束）。
+### 性能
 
-I/O 与压缩：
-- 追 ADIOS 调度器上游更新
-- 追 lz4 / zstd 上游 release
-- ZRAM 改 `=y` 省模块加载（已完成）
+- ZRAM =m → =y（内置进 vmlinux）
 
-### 3. 反检测
+### 功能增强
 
-内核层不直接改。隐藏能力由 SUSFS（构建时注入）+ 运行时配置提供。运行时配置入口：
-```
-sudo su -c "/data/adb/ksu/bin/ksu_susfs config list_all"
-```
-关键开关：
-- `hide_sus_mnts_for_non_su_procs` = true
-- `sus_path` 隐藏 /data/adb 及子路径
-- `sus_map` 隐藏 ksud / ksu_susfs 等
+- SECURITY_YAMA（ptrace 限制）
+- BTRFS_FS + BTRFS_FS_POSIX_ACL
+- NTFS3_FS
 
-uname 伪装由 SUSFS `set_uname` 完成，`/proc/version` 串由构建时 `KBUILD_BUILD_USER/HOST` 写死。
+### 构建流
 
-### 4. 功能增强（按需）
+- AK3 fork + rebrand（Alhkxsj/AnyKernel3）
+- release_enable 选项
+- spoof_version 一键伪装 /proc/version
+- SUSFS try_umount 关闭（droidspaces 兼容）
+- kpm 互斥检查
+- USER_NS + fix_oplus_bsp_midas ghost-task guard
+- SYSVIPC kABI patch 恢复
+- CVE-2026-43499 patch 已合入源码，构建流步骤已移除
 
-按需求评估，不主动堆砌：
-- 文件系统：BTRFS / NTFS3 / EROFS 压缩
-- 网络：WireGuard、DCTCP / Vegas
-- 容器：cgroup v2、netns 完善
-- 硬化：CFI_CLANG、INIT_STACK_ALL_ZERO、FORTIFY_SOURCE
+## 待办
 
-### 5. 上游同步节奏
+### 1. 安全（最高优先级）
+
+拉取 stable 6.6.y changelog（6.6.90+），逐条核对是否已合，未合的按本仓库风格适配后提交。重点关注 UAF、race、提权类。
+
+### 2. 性能调优（运行时，不改源码）
+
+- hmbird rescue 阈值（parctrl_high_ratio 55→70-75，proc 可调）
+- TCP buffer（tcp_rmem/tcp_wmem，sysctl 可调）
+- hmbird ravg window（sched_ravg_window_frame_per_sec，proc 可调）
+
+### 3. 上游同步
 
 | 项目 | 频率 | 来源 |
 |---|---|---|
