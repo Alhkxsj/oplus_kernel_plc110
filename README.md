@@ -20,7 +20,7 @@ OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 - Optional release publishing
 - AnyKernel3 (own fork)
 
-## Kernel fixes (28 files, 252 insertions)
+## Kernel fixes
 
 ### CVE (4)
 
@@ -29,7 +29,7 @@ OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 - CVE-2026-53266 ebt_snat: `skb_ensure_writable()` before ARP SHA rewrite
 - CVE-2026-23111 nftables: `nft_map_catchall_deactivate()` genmask check fix
 
-### stable backport (8)
+### stable backport
 
 - af_unix: remove `tail->len` compare in `unix_stream_data_wait()` (be309f8eae8b)
 - buffer: `put_bh` moved before `__end_buffer_read_notouch()` (7375f22495e7)
@@ -40,7 +40,7 @@ OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 - blk-cgroup: rstat flush UAF fix
 - xfrm: inexact bin UAF fix
 
-### f2fs (7)
+### f2fs 
 
 - `f2fs_write_end_io`: `f2fs_in_warm_node_list` before `dec_page_count` (2d9c4a4ed4ee)
 - `f2fs_get_dnode_of_data`: `nid == i_ino` validation (77de19b6867f)
@@ -50,13 +50,13 @@ OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 - `f2fs/segment`: discard_cmd_cnt race fix
 - `f2fs/file`: pin file offset rounddown fix
 
-### virt/geniezone (3, backport from mt6993)
+### virt/geniezone
 
 - vcpu lifecycle UAF: kref refcount, vcpu create→get, release→put, vm destroy on last put
 - ioeventfd: `gzvm_vm_ioeventfd_release()` added to `gzvm_destroy_vm`
 - irqfd: `cleanup_srcu_struct()` added to `gzvm_vm_irqfd_release`
 
-### hmbird (6)
+### hmbird
 
 - `set_audio_thread_sched_prop`: RCU UAF — `strcmp` moved into `rcu_read_lock` critical section
 - MT6991 topology: cpu6 `partial`→`big` (4×A520 + 3×A725 + 1×X925)
