@@ -50,7 +50,7 @@ CONFIG 调试开关一律不动（见约束）。
 I/O 与压缩：
 - 追 ADIOS 调度器上游更新
 - 追 lz4 / zstd 上游 release
-- ZRAM 改 `=y` 省模块加载，评估 ZRAM_WRITEBACK
+- ZRAM 改 `=y` 省模块加载（已完成）
 
 ### 3. 反检测
 
