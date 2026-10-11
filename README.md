@@ -19,8 +19,7 @@ OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 - /proc/version spoof
 - Optional release publishing
 - AnyKernel3 (own fork)
-- SECURITY_YAMA (ptrace restriction)
-- BTRFS + NTFS3 filesystem support
+- NTFS3 filesystem support
 - ZRAM built-in
 
 ## Kernel fixes
@@ -52,12 +51,6 @@ OnePlus Ace 5 Ultra (PLC110) Dimensity 9400+ 6.6.89 (MT6991) kernel build.
 - `f2fs_map_blocks`: fiemap bounds fix (95e159ad3e52)
 - `f2fs/segment`: discard_cmd_cnt race fix
 - `f2fs/file`: pin file offset rounddown fix
-
-### virt/geniezone
-
-- vcpu lifecycle UAF: kref refcount, vcpu create→get, release→put, vm destroy on last put
-- ioeventfd: `gzvm_vm_ioeventfd_release()` added to `gzvm_destroy_vm`
-- irqfd: `cleanup_srcu_struct()` added to `gzvm_vm_irqfd_release`
 
 ### hmbird
 

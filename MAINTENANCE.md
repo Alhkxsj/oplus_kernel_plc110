@@ -39,11 +39,6 @@ f2fs 7 项（commit `619b50381`）：
 - f2fs multidev trace 修复（eb2ca3ca9835）
 - f2fs pin file offset rounddown（4275b59673e）
 
-virt/geniezone 3 项（commit `c899081ec`，backport 自 mt6993）：
-- vcpu 生命周期 UAF（kref 引用计数）
-- ioeventfd 销毁泄漏
-- irqfd SRCU 泄漏
-
 hmbird 6 项：
 - set_audio_thread_sched_prop RCU UAF
 - MT6991 集群拓扑 cpu6 partial→big
@@ -52,14 +47,9 @@ hmbird 6 项：
 - heartbeat 超时 2.5s→10s
 - see=NULL 死代码清理
 
-### 性能
-
-- ZRAM =m → =y（内置进 vmlinux）
-
 ### 功能增强
 
-- SECURITY_YAMA（ptrace 限制）
-- BTRFS_FS + BTRFS_FS_POSIX_ACL
+- ZRAM =m → =y（内置进 vmlinux）
 - NTFS3_FS
 
 ### 构建流
