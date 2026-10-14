@@ -474,12 +474,19 @@ jobs:
           if [[ "${{ github.event.inputs.droidspaces_enable }}" != "false" ]]; then
             echo "正在启用 Droidspaces 容器支持..."
             cd kernel_workspace/common
+            # SYSVIPC kABI 已在内核源码中修复（reserve 3/4/5），无需打 patch
+            # 修补 oplus_bsp_midas 行为，避免开机崩溃
+            # USER_NS 下命名空间内进程 find_task_by_vpid 返回 NULL，
+            # oplus_bsp_midas 未判空直接解引用；此补丁返回 ghost task 兜底。
+            # 不加 || true：该补丁是 USER_NS 能开机的前提，静默失败会导致 bootloop
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/fix_oplus_bsp_midas.patch
             patch -p1 -F 3 < fix_oplus_bsp_midas.patch
+            # 应用 NTSync 补丁
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/ntsync_base.patch
             wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/droidspaces_patch/ntsync_compat_${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch
             patch -p1 -F 3 < ntsync_base.patch || true
             patch -p1 -F 3 < ntsync_compat_${{ env.ANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch || true
+            # 开启 Droidspaces 容器所需内核支持
             echo "CONFIG_PID_NS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_IPC_NS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_USER_NS=y" >> ./arch/arm64/configs/gki_defconfig
@@ -490,7 +497,13 @@ jobs:
             echo "CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_TARGET_LOG=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_NETFILTER_XT_MATCH_RECENT=y" >> ./arch/arm64/configs/gki_defconfig
-
+            # 未经测试的配置选项，可能导致bug
+            #echo "CONFIG_CGROUP_DEVICE=y" >> ./arch/arm64/configs/gki_defconfig
+            #echo "CONFIG_CGROUP_PIDS=y" >> ./arch/arm64/configs/gki_defconfig
+            #echo "CONFIG_FW_LOADER_COMPRESS=y" >> ./arch/arm64/configs/gki_defconfig
+            #echo "CONFIG_BRIDGE_NETFILTER=y" >> ./arch/arm64/configs/gki_defconfig
+            #echo "CONFIG_NF_TABLES=y" >> ./arch/arm64/configs/gki_defconfig
+            # 开启 NTSync
             echo "CONFIG_NTSYNC=y" >> ./arch/arm64/configs/gki_defconfig
             if [[ "${{ github.event.inputs.droidspaces_enable }}" == "extend" ]]; then
               echo "正在启用容器环境扩展支持..."
